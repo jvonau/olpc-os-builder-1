@@ -10,7 +10,7 @@ mkdir /bootpart
 
 # create olpc user
 # Provide access to ttyUSB nodes (#8434)
-/usr/sbin/useradd -m -c "olpc user" -G audio,wheel,uucp,video,dialout,lock olpc
+/usr/sbin/useradd -m -c "olpc user" -G audio,wheel,video,dialout,lock olpc
 /usr/bin/passwd -d olpc
 
 # make sure to own home directory and relax permissions a little
@@ -76,9 +76,13 @@ cat >/etc/statetab.d/olpc <<EOF
 /etc/hosts
 /etc/timezone
 /var/lib/dbus
-/var/lib/random-seed
+/var/lib/systemd/random-seed
 /etc/NetworkManager/system-connections
 EOF
+
+# random-seed is created by package install,
+# so destroy it before generating contents, fix for #12820
+rm -f /var/lib/systemd/random-seed
 
 # make sure statetab is set up before recording a random seed during boot
 # https://bugzilla.redhat.com/show_bug.cgi?id=808907
@@ -89,7 +93,6 @@ sed -i -e '/Before=/ s/$/ systemd-random-seed-load.service/' /lib/systemd/system
 # systemd actually does that during boot at systemd-random-seed-load time.
 # that is sufficient for our needs, and works around the shutdown issue
 # described at https://bugzilla.redhat.com/show_bug.cgi?id=808907#c7
-rm -f /etc/systemd/system/firewalld.service
 for i in fedora-loadmodules mdmonitor-takeover systemd-readahead-collect \
 		fedora-wait-storage fedora-storage-init fedora-storage-init-late \
 		fedora-autorelabel fedora-autorelabel-mark systemd-random-seed-save \
@@ -219,11 +222,6 @@ sed -i -e 's/plymouthd --mode=shutdown/plymouthd --mode=shutdown "--kernel-comma
 # remove the boot-duration file since it gets changed during boot (#11862)
 rm -f /var/lib/plymouth/boot-duration
 
-# call olpc-logrotate when log file hits 1mb (#10075)
-sed -i -e 's,/var/log/messages,:omfile:$messages,' \
-	-e '/$messages/ i$outchannel messages,/var/log/messages,1048576,/usr/sbin/olpc-logrotate' \
-	/etc/rsyslog.conf
-
 # limit journal memory usage (#12286)
 sed -i -e 's/#RuntimeMaxUse=$/RuntimeMaxUse=2M/' \
 	-e 's/#RuntimeMaxFileSize=$/RuntimeMaxFileSize=1M/' \
@@ -258,6 +256,22 @@ ln -s /dev/null /etc/systemd/system/systemd-update-utmp-shutdown.service
 # make it available to non-root users again (#12427)
 chmod u+s /usr/bin/ping
 
-# undo a change for fedora 20 which breaks runin
-sed -i -e 's^/usr/bin/hciconfig^/usr/sbin/hciconfig^' \
-    /runin/runin-bluetooth || true
+# adding a bogus gateway when using ad-hoc fixes Salut, without which
+# buddy icons and shared activities do not appear.  this is a
+# regression introduced by fedora 20.  see also #9669 for more
+# history.  see also #12817 (for the metric preference).
+cat >/etc/NetworkManager/dispatcher.d/99-adhoc-default-route <<EOF
+#!/bin/bash
+[[ "\$1" = "eth0" ]] || exit 0
+[[ "\$2" = "up" ]] || exit 0
+[[ "\${CONNECTION_ID:6:14}" = "Ad-hoc Network" ]] || exit 0
+[[ "\${IP4_ADDRESS_0:0:7}" = "169.254" ]] || exit 0
+/usr/sbin/ip route add default via 169.254.1.1 metric 2048
+EOF
+chmod +x /etc/NetworkManager/dispatcher.d/99-adhoc-default-route
+
+# fix serial console enter key handling (#12807)
+# revisit after fedora 20 when https://git.kernel.org/cgit/utils/util-linux/util-linux.git/commit/?id=bb280f79f188f910c41e97fd5fa8889ae8b76d62 reaches util-linux package
+cat >>/root/.bashrc <<EOF
+[[ "\$TERM" == "vt100" ]] && stty icrnl
+EOF
