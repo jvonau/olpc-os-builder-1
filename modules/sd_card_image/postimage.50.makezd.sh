@@ -20,6 +20,7 @@ function make_zd() {
 		$bindir/zhashfs 0x20000 sha256 $diskimg $output.zsp $output
 
 		echo "Creating MD5sum of $output_name..."
+		chmod 666 $outputdir
 		pushd $outputdir >/dev/null
 		md5sum $output_name > $output_name.md5
 		popd >/dev/null
