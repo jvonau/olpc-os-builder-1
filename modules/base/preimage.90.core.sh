@@ -95,6 +95,8 @@ find $fsmount -xdev -print0 | xargs -0 touch -h -c -d "$OLPC_EPOCH" || :
 
 # fails to compile due to "..."
 rm -f $fsmount/usr/lib/python2.7/lib2to3/tests/data/py3_test_grammar.py*
+rm -f $fsmount/usr/lib/python2.7/site-packages/zmq/tests/_test_asyncio.py*
+
 # not a python file (rh#980971)
 rm -f $fsmount/usr/share/bash-completion/completions/yummain.py
 
@@ -106,6 +108,7 @@ chroot $fsmount python -m compileall /usr/lib/python2.7 /usr/share/sugar \
 # now we have to normalize the mtimes of the new pyc/pyo files, but we'll do 
 # that after we've finished making other fs changes below
 
+echo "versioning..."
 if [ "$versioned_fs" = "1" ]; then
 	# Make upgradable
 	mkdir -p $fsmount/versions/pristine/$buildnr
