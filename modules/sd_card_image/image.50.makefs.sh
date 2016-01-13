@@ -77,6 +77,7 @@ EOF
 	disk_loop=$(losetup --show --find --partscan $img)
 	boot_loop="${disk_loop}p1"
 	root_loop="${disk_loop}p2"
+	partprobe
 
 	# Work around occasional failure for loop partitions to appear
 	# http://marc.info/?l=linux-kernel&m=134271282127702&w=2
