@@ -1,5 +1,5 @@
 . $OOB__shlib
-get_signed_objects=$(read_config sd_card_image get_signed_objects
+get_signed_objects=$(read_config sd_card_image get_signed_objects)
 
 if [[ "get_signed_ojects" == 1 ]]; then
     echo "Adding signed content..."
