@@ -62,7 +62,7 @@ vnstat_install: True
 awstats_install: True
 xovis_install: True
 teamviewer_install: False
-kalite_install: False
+kalite_install: True
 wordpress_install: False
 
 EOF
