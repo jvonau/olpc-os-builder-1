@@ -4,7 +4,7 @@ export PATH=/usr/bin:/usr/sbin:/sbin:/bin:$PATH
 echo "path is $PATH"
 
 #enable updates-testing till the mirrors straighen out
-#sed -i 's|enabled=0|enabled=1|' /etc/yum.repos.d/fedora-updates-testing.repo
+sed -i 's|enabled=0|enabled=1|' /etc/yum.repos.d/fedora-updates-testing.repo
 sed -i 's|enabled=0|enabled=1|' /etc/yum.repos.d/fedora-updates.repo
 
 yum -y install git ansible
@@ -83,5 +83,3 @@ EOF
 # get rid of custom local_vars
 #git reset --hard 
 #git checkout master
-
-rpm -ivh http://dev.laptop.org/~quozl/kernel-4.1.0_rc6_xo1.5-20150604.1436.olpc.3e60eda.i686.rpm
