@@ -14,3 +14,4 @@ if [[ "get_signed_ojects" == 1 ]]; then
     rsync rsync://updates.laptop.org/build-13.2.6_xo1.5-18/root/boot/actos1.zip $fsmount/boot/
     rsync rsync://updates.laptop.org/build-13.2.6_xo1.5-18/root/boot/actrd1.zip $fsmount/boot/
 fi
+
