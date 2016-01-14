@@ -14,14 +14,14 @@ mkdir -p /opt/schoolserver
 cd /opt/schoolserver
 
 ### release flow
-#git clone --depth 1 --branch stable https://github.com/XSCE/xsce 
+git clone --depth 1 --branch  build_freeze https://github.com/XSCE/xsce 
 #cd xsce
 #git branch <ver> 
 #git checkout <ver> 
 #git pull origin <ver>
 
 ### custom testing branch
-git clone --depth 1 --branch ks-files4 https://github.com/jvonau/xsce 
+#git clone --depth 1 --branch ks-files4 https://github.com/jvonau/xsce 
 cd xsce
 git checkout -b installer
 
